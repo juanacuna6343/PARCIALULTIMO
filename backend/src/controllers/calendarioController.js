@@ -1,52 +1,72 @@
-const { Tarea, Servicio, Usuario } = require('../models');
+const { mockData, addItem, findById, updateItem, findAllByField } = require('../mockData');
 
-async function listTareas(req, res, next) {
+exports.listTareas = (req, res) => {
   try {
-    const tareas = await Tarea.findAll({ include: [{ model: Servicio, as: 'servicio' }, { model: Usuario, as: 'responsable' }], order: [['fechaVencimiento', 'ASC']] });
+    const tareas = mockData.tareas
+      .map((t) => ({
+        ...t,
+        servicio: mockData.servicios.find((s) => s.id === t.servicioId),
+        responsable: mockData.usuarios.find((u) => u.id === t.responsableId),
+      }))
+      .sort((a, b) => new Date(a.fechaVencimiento || 0) - new Date(b.fechaVencimiento || 0));
     res.json({ success: true, data: tareas });
   } catch (error) {
-    next(error);
+    console.error('❌ Error listando tareas:', error);
+    res.status(500).json({ code: 'SERVER_ERROR', message: error.message });
   }
-}
+};
 
-async function createTarea(req, res, next) {
+exports.createTarea = (req, res) => {
   try {
-    const tarea = await Tarea.create(req.body);
+    const { titulo, descripcion, fechaVencimiento, prioridad, servicioId, responsableId } = req.body;
+
+    if (!titulo || !servicioId) {
+      return res.status(400).json({ code: 'VALIDATION_ERROR', message: 'Título y servicioId son requeridos' });
+    }
+
+    const tarea = addItem('tareas', {
+      titulo,
+      descripcion: descripcion || '',
+      fechaVencimiento: fechaVencimiento ? new Date(fechaVencimiento) : null,
+      prioridad: prioridad || 'media',
+      completada: false,
+      servicioId,
+      responsableId: responsableId || null,
+    });
+
     res.status(201).json({ success: true, data: tarea, message: 'Tarea creada exitosamente' });
   } catch (error) {
-    next(error);
+    console.error('❌ Error creando tarea:', error);
+    res.status(500).json({ code: 'SERVER_ERROR', message: error.message });
   }
-}
+};
 
-async function updateTarea(req, res, next) {
+exports.updateTarea = (req, res) => {
   try {
-    const tarea = await Tarea.findByPk(req.params.id);
+    const tarea = findById('tareas', parseInt(req.params.id));
     if (!tarea) {
-      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Tarea no encontrada' } });
+      return res.status(404).json({ code: 'NOT_FOUND', message: 'Tarea no encontrada' });
     }
-    await tarea.update(req.body);
-    res.json({ success: true, data: tarea, message: 'Tarea actualizada exitosamente' });
-  } catch (error) {
-    next(error);
-  }
-}
 
-async function completarTarea(req, res, next) {
+    const actualizada = updateItem('tareas', parseInt(req.params.id), req.body);
+    res.json({ success: true, data: actualizada, message: 'Tarea actualizada exitosamente' });
+  } catch (error) {
+    console.error('❌ Error actualizando tarea:', error);
+    res.status(500).json({ code: 'SERVER_ERROR', message: error.message });
+  }
+};
+
+exports.completarTarea = (req, res) => {
   try {
-    const tarea = await Tarea.findByPk(req.params.id);
+    const tarea = findById('tareas', parseInt(req.params.id));
     if (!tarea) {
-      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Tarea no encontrada' } });
+      return res.status(404).json({ code: 'NOT_FOUND', message: 'Tarea no encontrada' });
     }
-    await tarea.update({ completada: true });
-    res.json({ success: true, data: tarea, message: 'Tarea marcada como completada' });
-  } catch (error) {
-    next(error);
-  }
-}
 
-module.exports = {
-  listTareas,
-  createTarea,
-  updateTarea,
-  completarTarea
+    const actualizada = updateItem('tareas', parseInt(req.params.id), { completada: true });
+    res.json({ success: true, data: actualizada, message: 'Tarea marcada como completada' });
+  } catch (error) {
+    console.error('❌ Error completando tarea:', error);
+    res.status(500).json({ code: 'SERVER_ERROR', message: error.message });
+  }
 };

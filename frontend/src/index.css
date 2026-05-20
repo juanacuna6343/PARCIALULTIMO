@@ -1,145 +1,116 @@
-:root {
-  font-family: Inter, system-ui, sans-serif;
-  color: #111827;
-  background: #f8fafc;
-  line-height: 1.5;
+@import './styles/tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Global Reset & Base
+   ============================================================ */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-surface-950 text-surface-100 font-sans text-sm leading-relaxed;
+    min-height: 100dvh;
+  }
+
+  /* Scrollbar dark */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-surface-900; }
+  ::-webkit-scrollbar-thumb { @apply bg-surface-700 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-surface-600; }
+
+  /* Selection */
+  ::selection { @apply bg-brand-600/30 text-brand-200; }
+
+  /* Focus ring */
+  :focus-visible { @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-surface-950; }
 }
 
-* {
-  box-sizing: border-box;
+/* ============================================================
+   Component Utilities
+   ============================================================ */
+@layer components {
+  /* Glass card */
+  .glass {
+    @apply bg-surface-900/60 backdrop-blur-xl border border-white/[0.06];
+    box-shadow: var(--shadow-glass);
+  }
+
+  /* Page enter animation */
+  .page-enter {
+    animation: pageEnter 0.3s ease-out both;
+  }
+  @keyframes pageEnter {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent;
+  }
+
+  /* Divider */
+  .divider {
+    @apply border-0 border-t border-white/[0.06];
+  }
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: #f8fafc;
+/* ============================================================
+   FullCalendar dark theme overrides
+   ============================================================ */
+.fc {
+  --fc-border-color: rgba(255,255,255,0.07);
+  --fc-daygrid-event-dot-width: 8px;
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: rgba(255,255,255,0.04);
+  --fc-list-event-hover-bg-color: rgba(59,111,212,0.1);
+  --fc-highlight-color: rgba(59,111,212,0.12);
+  --fc-today-bg-color: rgba(59,111,212,0.08);
+  --fc-event-bg-color: #3B6FD4;
+  --fc-event-border-color: #2E57B8;
+  --fc-button-bg-color: #1E293B;
+  --fc-button-border-color: rgba(255,255,255,0.08);
+  --fc-button-hover-bg-color: #334155;
+  --fc-button-hover-border-color: rgba(255,255,255,0.12);
+  --fc-button-active-bg-color: #3B6FD4;
+  --fc-button-active-border-color: #2E57B8;
+  color: #F1F5F9;
 }
 
-button,
-input {
-  font: inherit;
+.fc .fc-toolbar-title {
+  @apply text-lg font-display font-bold text-surface-100;
 }
 
-.app-shell {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 24px;
+.fc .fc-col-header-cell-cushion,
+.fc .fc-daygrid-day-number,
+.fc .fc-timegrid-slot-label-cushion {
+  @apply text-surface-400 text-xs font-medium no-underline;
 }
 
-.panel {
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
-  padding: 24px;
+.fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  @apply bg-brand-600 text-white rounded-full w-7 h-7 flex items-center justify-center;
 }
 
-.panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
+.fc .fc-event {
+  @apply rounded-md border-none text-xs font-medium cursor-pointer transition-opacity hover:opacity-90;
 }
 
-h1 {
-  margin: 0 0 8px;
-  font-size: 28px;
+.fc .fc-button {
+  @apply rounded-md text-xs font-medium transition-colors;
 }
 
-p {
-  margin: 0;
-}
-
-.form {
-  display: grid;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-label {
-  display: grid;
-  gap: 8px;
-  font-weight: 600;
-}
-
-input {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  background: #f8fafc;
-}
-
-button {
-  padding: 12px 18px;
-  border: none;
-  border-radius: 12px;
-  background: #2563eb;
-  color: white;
-  cursor: pointer;
-}
-
-button.secondary {
-  background: #6b7280;
-}
-
-.error {
-  color: #b91c1c;
-  padding: 12px;
-  background: #fee2e2;
-  border-radius: 12px;
-}
-
-.success {
-  color: #166534;
-  padding: 12px;
-  background: #dcfce7;
-  border-radius: 12px;
-}
-
-.nav-links {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
-}
-
-.nav-links a {
-  text-decoration: none;
-  color: #2563eb;
-  font-weight: 600;
-}
-
-.stats-grid {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-}
-
-.card {
-  padding: 18px;
-  background: #f8fafc;
-  border-radius: 14px;
-  border: 1px solid #e5e7eb;
-}
-
-.table-wrapper {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px;
-}
-
-th,
-td {
-  padding: 14px 12px;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-th {
-  background: #f1f5f9;
-}
+/* ============================================================
+   Recharts dark overrides
+   ============================================================ */
+.recharts-cartesian-grid line { stroke: rgba(255,255,255,0.05); }
+.recharts-text { fill: #64748B !important; font-size: 11px; }
+.recharts-tooltip-wrapper { z-index: 50; }

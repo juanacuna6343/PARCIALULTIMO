@@ -5,6 +5,9 @@ const Servicio = require('./Servicio');
 const Tarea = require('./Tarea');
 const Documento = require('./Documento');
 const AuditLog = require('./AuditLog');
+const Suscripcion = require('./Suscripcion');
+const Evento = require('./Evento');
+const Oportunidad = require('./Oportunidad');
 
 const models = {
   Usuario,
@@ -12,7 +15,10 @@ const models = {
   Servicio,
   Tarea,
   Documento,
-  AuditLog
+  AuditLog,
+  Suscripcion,
+  Evento,
+  Oportunidad
 };
 
 Object.values(models).forEach((model) => {

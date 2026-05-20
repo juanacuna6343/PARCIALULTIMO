@@ -13,6 +13,7 @@ Tarea.init({
     type: DataTypes.STRING,
     allowNull: false
   },
+  descripcion: DataTypes.TEXT,
   fechaVencimiento: DataTypes.DATEONLY,
   prioridad: {
     type: DataTypes.STRING,
@@ -22,6 +23,13 @@ Tarea.init({
   completada: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
+  },
+  responsableId: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'usuarios',
+      key: 'id'
+    }
   }
 }, {
   sequelize,
@@ -31,3 +39,4 @@ Tarea.init({
 });
 
 module.exports = Tarea;
+

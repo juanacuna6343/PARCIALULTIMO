@@ -1,28 +1,46 @@
-const { Cliente, Servicio, Tarea, Usuario } = require('../models');
+const { mockData } = require('../mockData');
 
-async function getDashboard(req, res, next) {
+exports.getDashboard = (req, res) => {
   try {
-    const clientes = await Cliente.count();
-    const servicios = await Servicio.count();
-    const tareasPendientes = await Tarea.count({ where: { completada: false } });
-    const usuarios = await Usuario.count({ where: { activo: true } });
+    const clientes = mockData.clientes.length;
+    const servicios = mockData.servicios.length;
+    const tareasPendientes = mockData.tareas.filter((t) => !t.completada).length;
+    const usuarios = mockData.usuarios.filter((u) => u.activo).length;
 
-    res.json({ success: true, data: { clientes, servicios, tareasPendientes, usuarios } });
+    res.json({
+      success: true,
+      data: {
+        clientes,
+        servicios,
+        tareasPendientes,
+        usuarios,
+      },
+    });
   } catch (error) {
-    next(error);
+    console.error('❌ Error en dashboard:', error);
+    res.status(500).json({ code: 'SERVER_ERROR', message: error.message });
   }
-}
+};
 
-async function getKpis(req, res, next) {
+exports.getKpis = (req, res) => {
   try {
-    const serviciosPorEstado = await Servicio.findAll({ attributes: ['estado', [Servicio.sequelize.fn('COUNT', Servicio.sequelize.col('id')), 'cantidad']], group: ['estado'] });
-    res.json({ success: true, data: { serviciosPorEstado } });
-  } catch (error) {
-    next(error);
-  }
-}
+    const serviciosPorEstado = {};
 
-module.exports = {
-  getDashboard,
-  getKpis
+    mockData.servicios.forEach((servicio) => {
+      if (!serviciosPorEstado[servicio.estado]) {
+        serviciosPorEstado[servicio.estado] = { estado: servicio.estado, cantidad: 0 };
+      }
+      serviciosPorEstado[servicio.estado].cantidad++;
+    });
+
+    res.json({
+      success: true,
+      data: {
+        serviciosPorEstado: Object.values(serviciosPorEstado),
+      },
+    });
+  } catch (error) {
+    console.error('❌ Error en KPIs:', error);
+    res.status(500).json({ code: 'SERVER_ERROR', message: error.message });
+  }
 };
