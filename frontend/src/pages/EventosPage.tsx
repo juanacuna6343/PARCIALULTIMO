@@ -20,33 +20,46 @@ import { format, differenceInDays } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 const schema = z.object({
-  nombre: z.string().min(2, 'Nombre requerido'),
+  titulo: z.string().min(2, 'Nombre requerido'),
   descripcion: z.string().optional(),
-  estado: z.enum(['proximo', 'realizado', 'cancelado']),
+  tipo: z.enum(['charla', 'taller', 'conferencia', 'reunion', 'otro']),
+  estado: z.enum(['planificado', 'confirmado', 'en_curso', 'completado', 'cancelado']),
   fecha: z.string().min(1, 'Fecha requerida'),
   hora: z.string().min(1, 'Hora requerida'),
+  fechaFin: z.string().optional(),
   ubicacion: z.string().min(2, 'Ubicación requerida'),
-  cupo: z.coerce.number().min(1, 'Cupo mínimo 1'),
-  valor: z.coerce.number().optional(),
-  organizador: z.string().optional(),
+  cuposDisponibles: z.coerce.number().min(0, 'Cupo mínimo 0'),
+  valor: z.coerce.number().min(0, 'Valor requerido'),
+  enlaceZoom: z.string().url().optional(),
+  materialUrl: z.string().url().optional(),
 })
 type FormData = z.infer<typeof schema>
 
-const estadoBadge: Record<EstadoEvento, { v: 'success' | 'info' | 'danger'; label: string }> = {
-  proximo: { v: 'info', label: 'Próximo' },
-  realizado: { v: 'success', label: 'Realizado' },
+const estadoBadge: Record<EstadoEvento, { v: 'success' | 'info' | 'warning' | 'danger'; label: string }> = {
+  planificado: { v: 'info', label: 'Planificado' },
+  confirmado: { v: 'success', label: 'Confirmado' },
+  en_curso: { v: 'warning', label: 'En curso' },
+  completado: { v: 'success', label: 'Completado' },
   cancelado: { v: 'danger', label: 'Cancelado' },
 }
 
 const TABS = [
   { id: 'todos', label: 'Todos' },
-  { id: 'proximo', label: 'Próximos' },
-  { id: 'realizado', label: 'Realizados' },
+  { id: 'planificado', label: 'Planificados' },
+  { id: 'confirmado', label: 'Confirmados' },
+  { id: 'en_curso', label: 'En curso' },
+  { id: 'completado', label: 'Completados' },
   { id: 'cancelado', label: 'Cancelados' },
 ]
 
 const formatCOP = (v?: number) =>
   v ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v) : 'Gratis'
+
+const formatDateForInput = (value: string | Date) =>
+  typeof value === 'string' ? value.split('T')[0] : value.toISOString().split('T')[0]
+
+const formatTimeForInput = (value: string | Date) =>
+  typeof value === 'string' ? value.split('T')[1]?.slice(0, 5) ?? '' : value.toISOString().split('T')[1]?.slice(0, 5) ?? ''
 
 interface EventoModalProps { open: boolean; onClose: () => void; evento?: Evento }
 const EventoModal = ({ open, onClose, evento }: EventoModalProps) => {
@@ -58,25 +71,41 @@ const EventoModal = ({ open, onClose, evento }: EventoModalProps) => {
     resolver: zodResolver(schema),
     defaultValues: evento
       ? {
-          nombre: evento.nombre,
+          titulo: evento.titulo,
           descripcion: evento.descripcion ?? '',
+          tipo: evento.tipo,
           estado: evento.estado,
-          fecha: evento.fecha,
-          hora: evento.hora,
-          ubicacion: evento.ubicacion,
-          cupo: evento.cupo,
+          fecha: formatDateForInput(evento.fechaInicio),
+          hora: formatTimeForInput(evento.fechaInicio),
+          fechaFin: evento.fechaFin ? formatDateForInput(evento.fechaFin) : '',
+          ubicacion: evento.ubicacion ?? '',
+          cuposDisponibles: evento.cuposDisponibles,
           valor: evento.valor ?? 0,
-          organizador: evento.organizador ?? '',
+          enlaceZoom: evento.enlaceZoom ?? '',
+          materialUrl: evento.materialUrl ?? '',
         }
-      : { estado: 'proximo' },
+      : { estado: 'planificado', tipo: 'charla', cuposDisponibles: 0, valor: 0, fecha: '', hora: '' },
   })
 
   const onSubmit = (data: FormData) => {
-    if (isEdit && evento) update({ id: evento.id, data }, { onSuccess: () => { onClose(); reset() } })
-    else create(data as EventoFormData, { onSuccess: () => { onClose(); reset() } })
+    const payload = {
+      ...data,
+      fechaInicio: `${data.fecha}T${data.hora}`,
+      fechaFin: data.fechaFin ? `${data.fechaFin}T${data.hora}` : undefined,
+    }
+
+    if (isEdit && evento) update({ id: evento.id, data: payload as EventoFormData }, { onSuccess: () => { onClose(); reset() } })
+    else create(payload as EventoFormData, { onSuccess: () => { onClose(); reset() } })
   }
 
   const estadoOpts = Object.entries(estadoBadge).map(([value, { label }]) => ({ value, label }))
+  const tipoOpts = [
+    { value: 'charla', label: 'Charla' },
+    { value: 'taller', label: 'Taller' },
+    { value: 'conferencia', label: 'Conferencia' },
+    { value: 'reunion', label: 'Reunión' },
+    { value: 'otro', label: 'Otro' },
+  ]
 
   return (
     <Modal
@@ -93,17 +122,23 @@ const EventoModal = ({ open, onClose, evento }: EventoModalProps) => {
       }
     >
       <div className="space-y-4">
-        <Input {...register('nombre')} id="ev-nombre" label="Nombre del evento *" placeholder="Ej: Webinar Digital" error={errors.nombre?.message} />
+        <Input {...register('titulo')} id="ev-nombre" label="Nombre del evento *" placeholder="Ej: Webinar Digital" error={errors.titulo?.message} />
         <div className="grid grid-cols-2 gap-4">
+          <Select id="ev-tipo" label="Tipo *" options={tipoOpts} value={watch('tipo')} onChange={v => setValue('tipo', v as Evento['tipo'])} />
           <Select id="ev-estado" label="Estado *" options={estadoOpts} value={watch('estado')} onChange={v => setValue('estado', v as EstadoEvento)} />
-          <Input {...register('cupo')} id="ev-cupo" label="Cupo máximo *" type="number" placeholder="0" error={errors.cupo?.message} leftIcon={<Users size={13} />} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <Input {...register('fecha')} id="ev-fecha" label="Fecha *" type="date" error={errors.fecha?.message} />
           <Input {...register('hora')} id="ev-hora" label="Hora *" type="time" error={errors.hora?.message} leftIcon={<Clock size={13} />} />
         </div>
+        <Input {...register('fechaFin')} id="ev-fecha-fin" label="Fecha fin" type="date" error={errors.fechaFin?.message} />
         <Input {...register('ubicacion')} id="ev-ubicacion" label="Ubicación *" placeholder="Ej: Sala A / Online" error={errors.ubicacion?.message} leftIcon={<MapPin size={13} />} />
-        <Input {...register('valor')} id="ev-valor" label="Valor (COP)" type="number" placeholder="Dejar en blanco si es gratis" />
+        <div className="grid grid-cols-2 gap-4">
+          <Input {...register('cuposDisponibles')} id="ev-cupo" label="Cupo máximo *" type="number" placeholder="0" error={errors.cuposDisponibles?.message} leftIcon={<Users size={13} />} />
+          <Input {...register('valor')} id="ev-valor" label="Valor (COP)" type="number" placeholder="0" error={errors.valor?.message} />
+        </div>
+        <Input {...register('enlaceZoom')} id="ev-enlace" label="Enlace Zoom" placeholder="https://..." error={errors.enlaceZoom?.message} />
+        <Input {...register('materialUrl')} id="ev-material" label="Material" placeholder="https://..." error={errors.materialUrl?.message} />
         <textarea {...register('descripcion')} id="ev-desc" rows={2} placeholder="Descripción del evento..." className="w-full rounded-lg bg-surface-800 border border-white/10 text-surface-100 text-sm px-3 py-2 placeholder:text-surface-600 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/30 transition-all resize-none" />
       </div>
     </Modal>
@@ -123,8 +158,8 @@ export default function EventosPage() {
   const counts = TABS.reduce((acc, t) => ({ ...acc, [t.id]: t.id === 'todos' ? eventos.length : eventos.filter(e => e.estado === t.id).length }), {} as Record<string, number>)
 
   const proximosEventos = eventos
-    .filter(e => e.estado === 'proximo')
-    .map(e => ({ ...e, diasRestantes: differenceInDays(new Date(e.fecha), new Date()) }))
+    .filter(e => new Date(e.fechaInicio) >= new Date())
+    .map(e => ({ ...e, diasRestantes: differenceInDays(new Date(e.fechaInicio), new Date()) }))
     .filter(e => e.diasRestantes >= 0)
     .sort((a, b) => a.diasRestantes - b.diasRestantes)
 
@@ -145,7 +180,7 @@ export default function EventosPage() {
           <AlertCircle size={18} className="text-info flex-shrink-0 mt-0.5" />
           <div className="flex-1 text-sm">
             <p className="font-medium text-surface-100">Evento próximo en {proximosEventos[0].diasRestantes} días</p>
-            <p className="text-surface-500 text-xs mt-0.5">{proximosEventos[0].nombre} • {proximosEventos[0].inscritos}/{proximosEventos[0].cupo} inscritos</p>
+            <p className="text-surface-500 text-xs mt-0.5">{proximosEventos[0].titulo} • {(proximosEventos[0].inscriptos?.length ?? 0)}/{proximosEventos[0].cuposDisponibles} inscritos</p>
           </div>
         </div>
       )}
@@ -172,8 +207,8 @@ export default function EventosPage() {
         >
           {filtered.map((e) => {
             const badge = estadoBadge[e.estado]
-            const porcentajeInscritos = Math.round((e.inscritos / e.cupo) * 100)
-            const lugaresDisponibles = e.cupo - e.inscritos
+            const inscritos = e.inscriptos?.length ?? 0
+            const porcentajeInscritos = e.cuposDisponibles > 0 ? Math.round((inscritos / e.cuposDisponibles) * 100) : 0
 
             return (
               <motion.div key={e.id} variants={{ hidden: { opacity: 0, x: -12 }, show: { opacity: 1, x: 0 } }}>
@@ -185,7 +220,7 @@ export default function EventosPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-display font-semibold text-surface-100 text-sm">{e.nombre}</h3>
+                          <h3 className="font-display font-semibold text-surface-100 text-sm">{e.titulo}</h3>
                           {e.descripcion && <p className="text-xs text-surface-500 mt-0.5 line-clamp-1">{e.descripcion}</p>}
                         </div>
                         <Badge variant={badge.v} dot size="sm">{badge.label}</Badge>
@@ -193,7 +228,7 @@ export default function EventosPage() {
                       <div className="grid grid-cols-3 gap-4 mt-3">
                         <div className="flex items-center gap-2 text-xs">
                           <Clock size={13} className="text-surface-500" />
-                          <span className="text-surface-300">{format(new Date(`${e.fecha}T${e.hora}`), 'd MMM, HH:mm', { locale: es })}</span>
+                          <span className="text-surface-300">{format(new Date(e.fechaInicio), 'd MMM, HH:mm', { locale: es })}</span>
                         </div>
                         <div className="flex items-center gap-2 text-xs">
                           <MapPin size={13} className="text-surface-500" />
@@ -201,7 +236,7 @@ export default function EventosPage() {
                         </div>
                         <div className="flex items-center gap-2 text-xs">
                           <Users size={13} className="text-surface-500" />
-                          <span className="text-surface-300">{e.inscritos}/{e.cupo}</span>
+                          <span className="text-surface-300">{inscritos}/{e.cuposDisponibles}</span>
                         </div>
                       </div>
                       <div className="w-full bg-surface-800 rounded-full h-1.5 mt-2">
@@ -239,7 +274,7 @@ export default function EventosPage() {
         onClose={() => setDeleteTarget(undefined)}
         onConfirm={() => { if (deleteTarget) del(deleteTarget.id, { onSuccess: () => setDeleteTarget(undefined) }) }}
         title="¿Eliminar evento?"
-        message={`Se eliminará "${deleteTarget?.nombre}" permanentemente.`}
+        message={`Se eliminará "${deleteTarget?.titulo}" permanentemente.`}
         confirmLabel="Eliminar"
         isLoading={deleting}
       />

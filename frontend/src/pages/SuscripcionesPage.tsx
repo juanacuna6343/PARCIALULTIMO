@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Plus, Pencil, Trash2, CreditCard, DollarSign, Calendar, AlertCircle } from 'lucide-react'
-import { useForm } from 'react-hook-form'
+import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Card } from '../components/ui/Card'
@@ -33,6 +33,9 @@ const schema = z.object({
   notas: z.string().optional(),
 })
 type FormData = z.infer<typeof schema>
+
+const formatDateForInput = (value: string | Date) =>
+  typeof value === 'string' ? value.split('T')[0] : value.toISOString().split('T')[0]
 
 const estadoBadge: Record<EstadoSuscripcion, { v: 'success' | 'danger' | 'warning' | 'info'; label: string }> = {
   activa: { v: 'success', label: 'Activa' },
@@ -66,7 +69,7 @@ const SuscripcionModal = ({ open, onClose, suscripcion }: SuscripcionModalProps)
   const { data: clientes = [] } = useClientes()
 
   const { register, handleSubmit, setValue, watch, formState: { errors }, reset } = useForm<FormData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as Resolver<FormData>,
     defaultValues: suscripcion
       ? {
           clienteId: suscripcion.clienteId,
@@ -75,12 +78,23 @@ const SuscripcionModal = ({ open, onClose, suscripcion }: SuscripcionModalProps)
           estado: suscripcion.estado,
           valor: suscripcion.valor,
           frecuencia: suscripcion.frecuencia,
-          fechaInicio: suscripcion.fechaInicio.split('T')[0],
-          fechaRenovacion: suscripcion.fechaRenovacion.split('T')[0],
-          proximoPago: suscripcion.proximoPago.split('T')[0],
+          fechaInicio: formatDateForInput(suscripcion.fechaInicio),
+          fechaRenovacion: formatDateForInput(suscripcion.fechaRenovacion),
+          proximoPago: formatDateForInput(suscripcion.proximoPago),
           notas: suscripcion.notas ?? '',
         }
-      : { estado: 'activa', frecuencia: 'mensual' },
+      : {
+          clienteId: 0,
+          nombre: '',
+          descripcion: '',
+          estado: 'activa',
+          valor: 0,
+          frecuencia: 'mensual',
+          fechaInicio: '',
+          fechaRenovacion: '',
+          proximoPago: '',
+          notas: '',
+        },
   })
 
   const onSubmit = (data: FormData) => {
@@ -110,8 +124,8 @@ const SuscripcionModal = ({ open, onClose, suscripcion }: SuscripcionModalProps)
           id="suc-cliente" 
           label="Cliente *" 
           options={clienteOptions} 
-          value={watch('clienteId').toString()} 
-          onChange={v => setValue('clienteId', parseInt(v))}
+          value={watch('clienteId')?.toString() || ''} 
+          onChange={v => setValue('clienteId', Number(v))}
           error={errors.clienteId?.message}
         />
         <Input {...register('nombre')} id="suc-nombre" label="Nombre del plan *" placeholder="Ej: Plan Premium" error={errors.nombre?.message} />
@@ -253,27 +267,14 @@ export default function SuscripcionesPage() {
           open={!!deleteTarget}
           title="Eliminar suscripción"
           message={`¿Eliminar "${deleteTarget.nombre}"? Esta acción no se puede deshacer.`}
-          confirmText="Eliminar"
+          confirmLabel="Eliminar"
           isLoading={deleting}
           onConfirm={() => {
             del(deleteTarget.id, { onSuccess: () => setDeleteTarget(undefined) })
           }}
-          onCancel={() => setDeleteTarget(undefined)}
-          variant="danger"
+          onClose={() => setDeleteTarget(undefined)}
         />
       )}
-    </div>
-  )
-}
-      <ConfirmModal
-        open={!!deleteTarget}
-        onClose={() => setDeleteTarget(undefined)}
-        onConfirm={() => { if (deleteTarget) del(deleteTarget.id, { onSuccess: () => setDeleteTarget(undefined) }) }}
-        title="¿Eliminar suscripción?"
-        message={`Se eliminará "${deleteTarget?.nombre}" permanentemente.`}
-        confirmLabel="Eliminar"
-        isLoading={deleting}
-      />
     </div>
   )
 }

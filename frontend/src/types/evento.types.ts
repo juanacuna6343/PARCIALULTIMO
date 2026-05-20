@@ -27,6 +27,7 @@ export interface Evento {
     nombre: string
     email: string
   }
+  valor?: number
   enlaceZoom?: string
   materialUrl?: string
   createdAt: string

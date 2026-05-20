@@ -1,5 +1,6 @@
-export type Etapa = 'contacto' | 'propuesta' | 'negociacion' | 'cierre' | 'ganada' | 'perdida'
+export type EtapaPipeline = 'contacto' | 'propuesta' | 'negociacion' | 'cierre' | 'ganada' | 'perdida'
 export type Prioridad = 'baja' | 'media' | 'alta'
+export type ProbabilidadCierre = 25 | 50 | 75 | 90
 
 export interface Oportunidad {
   id: number
@@ -7,7 +8,7 @@ export interface Oportunidad {
   descripcion?: string
   clienteId: number
   responsableId?: number
-  etapa: Etapa
+  etapa: EtapaPipeline
   valor: number
   probabilidad: number
   fechaEstimada?: string | Date
@@ -25,13 +26,15 @@ export interface Oportunidad {
     nombre: string
     email: string
   }
+  clienteNombre?: string
+  responsableNombre?: string
 }
 
 export interface CreateOportunidadRequest {
   titulo: string
   descripcion?: string
   clienteId: number
-  etapa?: Etapa
+  etapa?: EtapaPipeline
   valor: number
   probabilidad?: number
   fechaEstimada?: string | Date
@@ -42,7 +45,7 @@ export interface CreateOportunidadRequest {
 export interface UpdateOportunidadRequest extends Partial<CreateOportunidadRequest> {}
 
 export interface CambiarEtapaRequest {
-  etapa: Etapa
+  etapa: EtapaPipeline
 }
 
 export interface OportunidadFormData extends CreateOportunidadRequest {}

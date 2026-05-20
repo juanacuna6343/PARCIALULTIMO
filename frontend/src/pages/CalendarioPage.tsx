@@ -3,8 +3,8 @@ import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin   from '@fullcalendar/daygrid'
 import timeGridPlugin  from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import type { DateClickArg, EventClickArg } from '@fullcalendar/interaction'
-import type { EventDropArg } from '@fullcalendar/core'
+import type { DateClickArg } from '@fullcalendar/interaction'
+import type { EventClickArg, EventDropArg } from '@fullcalendar/core'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -227,8 +227,8 @@ export default function CalendarioPage() {
               )}
             </div>
             <div className="flex gap-2 pt-3 border-t border-white/10">
-              <Button size="sm" variant="secondary" fullWidth onClick={() => { setDetailEvento(undefined); setEditEvento(detailEvento); setModalOpen(true) }}>
-                Editar
+              <Button size="sm" variant="secondary" fullWidth onClick={() => setDetailEvento(undefined)}>
+                Cerrar
               </Button>
               <Button size="sm" variant="ghost" className="hover:text-danger" fullWidth onClick={() => { setDetailEvento(undefined); setDeleteTarget(detailEvento) }}>
                 Eliminar
@@ -243,32 +243,14 @@ export default function CalendarioPage() {
           open={!!deleteTarget}
           onClose={() => setDeleteTarget(undefined)}
           onConfirm={() => {
-            if (deleteTarget) del(deleteTarget.id, { onSuccess: () => setDeleteTarget(undefined) })
+            if (deleteTarget) remove(deleteTarget.id, { onSuccess: () => setDeleteTarget(undefined) })
           }}
           title="¿Eliminar evento?"
           message={`Se eliminará "${deleteTarget.titulo}" del calendario.`}
           confirmLabel="Eliminar"
-          isLoading={deleting}
+          isLoading={removing}
         />
       )}
-    </div>
-  )
-}
-}
-          onClose={() => setDetailEvento(undefined)}
-          onDelete={() => { setDeleteTarget(detailEvento); setDetailEvento(undefined) }}
-        />
-      )}
-
-      <ConfirmModal
-        open={!!deleteTarget}
-        onClose={() => setDeleteTarget(undefined)}
-        onConfirm={() => { if (deleteTarget) remove(deleteTarget.id, { onSuccess: () => setDeleteTarget(undefined) }) }}
-        title="¿Eliminar evento?"
-        message={`Se eliminará "${deleteTarget?.titulo}" del calendario.`}
-        confirmLabel="Eliminar evento"
-        isLoading={removing}
-      />
     </div>
   )
 }

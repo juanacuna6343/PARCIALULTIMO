@@ -66,7 +66,7 @@ const ServicioModal = ({ open, onClose, servicio }: ServicioModalProps) => {
   const { register, handleSubmit, setValue, watch, formState: { errors }, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: servicio
-      ? { nombre: servicio.nombre, descripcion: servicio.descripcion ?? '', clienteId: servicio.clienteId, estado: servicio.estado, precio: servicio.precio, fechaInicio: servicio.fechaInicio.split('T')[0], fechaFin: servicio.fechaFin?.split('T')[0] ?? '', notas: servicio.notas ?? '' }
+      ? { nombre: servicio.nombre, descripcion: servicio.descripcion ?? '', clienteId: servicio.clienteId, estado: servicio.estado, precio: servicio.precio, fechaInicio: servicio.fechaInicio ? servicio.fechaInicio.split('T')[0] : '', fechaFin: servicio.fechaFin ? servicio.fechaFin.split('T')[0] : '', notas: servicio.notas ?? '' }
       : { estado: 'pendiente', precio: 0 },
   })
 
@@ -97,7 +97,7 @@ const ServicioModal = ({ open, onClose, servicio }: ServicioModalProps) => {
           id="s-cliente" 
           label="Cliente *" 
           options={clienteOptions} 
-          value={watch('clienteId').toString()} 
+          value={watch('clienteId')?.toString() || ''} 
           onChange={v => setValue('clienteId', parseInt(v))}
           error={errors.clienteId?.message}
           placeholder="Selecciona un cliente"
@@ -223,5 +223,4 @@ export default function ServiciosPage() {
       )}
     </div>
   )
-}
 }

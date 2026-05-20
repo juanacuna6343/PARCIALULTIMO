@@ -5,9 +5,24 @@ import type { Evento, EventoFormData } from '../../../types/evento.types'
 import type { ApiResponse } from '../../../types/api.types'
 
 const MOCK_EVENTOS: Evento[] = [
-  { id: 1, nombre: 'Webinar: Transformación Digital', descripcion: 'Estrategias de digitalización para empresas', estado: 'proximo', fecha: '2024-06-15', hora: '10:00', ubicacion: 'Online', cupo: 100, inscritos: 45, valor: 0, organizador: 'SGDI', createdAt: '2024-05-01T00:00:00Z', updatedAt: '2024-05-01T00:00:00Z' },
-  { id: 2, nombre: 'Charla: Liderazgo Empresarial', descripcion: 'Nuevos paradigmas de liderazgo', estado: 'proximo', fecha: '2024-06-22', hora: '14:00', ubicacion: 'Centro de Conferencias', cupo: 50, inscritos: 32, valor: 50000, organizador: 'SGDI', createdAt: '2024-05-05T00:00:00Z', updatedAt: '2024-05-05T00:00:00Z' },
-  { id: 3, nombre: 'Taller: Gestión de Proyectos', descripcion: 'Metodología ágil aplicada', estado: 'proximo', fecha: '2024-07-10', hora: '09:00', ubicacion: 'Sala A', cupo: 30, inscritos: 28, valor: 150000, organizador: 'SGDI', createdAt: '2024-05-10T00:00:00Z', updatedAt: '2024-05-10T00:00:00Z' },
+  { id: 1, titulo: 'Webinar: Transformación Digital', descripcion: 'Estrategias de digitalización para empresas', tipo: 'charla', estado: 'confirmado', fechaInicio: '2024-06-15T10:00:00Z', fechaFin: '2024-06-15T12:00:00Z', ubicacion: 'Online', cuposDisponibles: 100, cuposOcupados: 45, inscriptos: [
+      { id: 1, nombre: 'Pedro Rodríguez', email: 'pedro@email.com', telefono: '3101234567', fechaInscripcion: '2024-05-01T00:00:00Z' }
+    ],
+    organizador: { id: 1, nombre: 'SGDI', email: 'contacto@sgdi.com' },
+    createdAt: '2024-05-01T00:00:00Z',
+    updatedAt: '2024-05-01T00:00:00Z' },
+  { id: 2, titulo: 'Charla: Liderazgo Empresarial', descripcion: 'Nuevos paradigmas de liderazgo', tipo: 'charla', estado: 'confirmado', fechaInicio: '2024-06-22T14:00:00Z', fechaFin: '2024-06-22T16:00:00Z', ubicacion: 'Centro de Conferencias', cuposDisponibles: 50, cuposOcupados: 32, inscriptos: [
+      { id: 1, nombre: 'Ana García', email: 'ana@email.com', telefono: '3109876543', fechaInscripcion: '2024-05-05T00:00:00Z' }
+    ],
+    organizador: { id: 1, nombre: 'SGDI', email: 'contacto@sgdi.com' },
+    createdAt: '2024-05-05T00:00:00Z',
+    updatedAt: '2024-05-05T00:00:00Z' },
+  { id: 3, titulo: 'Taller: Gestión de Proyectos', descripcion: 'Metodología ágil aplicada', tipo: 'taller', estado: 'confirmado', fechaInicio: '2024-07-10T09:00:00Z', fechaFin: '2024-07-10T12:00:00Z', ubicacion: 'Sala A', cuposDisponibles: 30, cuposOcupados: 28, inscriptos: [
+      { id: 1, nombre: 'Luis Méndez', email: 'luis@email.com', telefono: '3100000000', fechaInscripcion: '2024-05-10T00:00:00Z' }
+    ],
+    organizador: { id: 1, nombre: 'SGDI', email: 'contacto@sgdi.com' },
+    createdAt: '2024-05-10T00:00:00Z',
+    updatedAt: '2024-05-10T00:00:00Z' },
 ]
 
 const fetchEventos = async (): Promise<Evento[]> => {
