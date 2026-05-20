@@ -1,99 +1,81 @@
-# 🚀 SGDI Beta 1 - Sistema de Gestión de Clientes y Servicios
+# 🚀 PARCIALULTIMO / SGDI Beta 1
 
-**SGDI** es una plataforma empresarial completa para gestionar clientes, servicios, suscripciones, eventos y pipeline de ventas. Diseñada con una arquitectura moderna y escalable.
+**PARCIALULTIMO** es una aplicación fullstack para administración de clientes, servicios, suscripciones, eventos y pipeline comercial.
+
+Se divide en dos partes:
+- `backend` con API REST en Node.js + Express
+- `frontend` en React + Vite + TypeScript
 
 ---
 
-## 📋 Tabla de Contenidos
+## 📌 Contenido
 
+- [Resumen](#resumen)
 - [Características](#características)
 - [Requisitos](#requisitos)
 - [Instalación](#instalación)
-- [Uso](#uso)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [API Endpoints](#api-endpoints)
-- [Tecnologías](#tecnologías)
-- [Credenciales de Prueba](#credenciales-de-prueba)
-- [Notas Importantes](#notas-importantes)
+- [Ejecución](#ejecución)
+- [Estructura del proyecto](#estructura-del-proyecto)
+- [API disponible](#api-disponible)
+- [Credenciales de prueba](#credenciales-de-prueba)
+- [Notas importantes](#notas-importantes)
 
 ---
 
-## ✨ Características
+## 🧾 Resumen
 
-### 📊 Dashboard
-- KPIs en tiempo real (clientes, servicios, tareas pendientes)
-- Gráficos de estadísticas
-- Activity log
+Este proyecto ofrece un sistema de gestión digital para:
+- Clientes
+- Servicios
+- Suscripciones
+- Eventos y calendario
+- Pipeline de ventas
+- Usuarios y roles
 
-### 👥 Gestión de Clientes
-- CRUD completo de clientes
-- Filtrado por estado (activo, inactivo, prospecto)
-- Búsqueda y paginación
+Está pensado como un prototipo funcional con datos simulados en backend.
 
-### 🛠️ Gestión de Servicios
-- Crear y actualizar servicios
-- Asignación a clientes
-- Estados: pendiente, en progreso, completado, cancelado
-- Visualización en tarjetas con animaciones
+---
 
-### 💳 Gestión de Suscripciones
-- Suscripciones recurrentes (mensual, trimestral, semestral, anual)
-- MRR (Monthly Recurring Revenue)
-- Alertas de renovaciones próximas
-- Estados: activa, vencida, cancelada, pendiente
+## ✨ Características principales
 
-### 📅 Gestión de Eventos
-- Crear y gestionar eventos/charlas
-- Control de capacidad y inscripciones
-- Barras de progreso visual
-- Barra de proximidad temporal
-
-### 🤝 Pipeline de Ventas
-- Oportunidades comerciales por etapa (contacto, propuesta, negociación, cierre)
-- Visualización en Kanban
-- Cálculo de valor ponderado por probabilidad
-- Estadísticas por etapa
-
-### 📆 Calendario
-- Integración con FullCalendar
-- Creación y edición de eventos
-- Vista mensual, semanal y diaria
-
-### 👨‍💼 Gestión de Usuarios
-- Crear usuarios con roles (admin, supervisor, usuario)
-- Contraseña con hash bcryptjs
-- Estados activo/inactivo
-- Tabla con información de contacto
-
-### 📊 Auditoría
-- Logs de cambios del sistema
-- Tracking de acciones de usuarios
+- Login con JWT
+- Autorización de rutas protegidas
+- CRUD de clientes y servicios
+- Gestión de suscripciones
+- Calendario interactivo con FullCalendar
+- Pipeline de oportunidades
+- Dashboard con indicadores
+- Manejo de estado con Zustand
+- API REST simplificada
 
 ---
 
 ## 🔧 Requisitos
 
-- **Node.js** v18+ 
-- **npm** v9+
-- **Git**
+- Node.js 18 o superior
+- npm 9 o superior
+- Git
 
 ---
 
-## 📦 Instalación
+## 🚀 Instalación
 
-### 1️⃣ Clonar el Repositorio
+### 1. Clonar el repositorio
+
 ```bash
-git clone https://github.com/FREDDYSTICAS/UNIMINUTO-IA.git
-cd sgdi-beta1
+git clone https://github.com/juanacuna6343/PARCIALULTIMO.git
+cd PARCIALULTIMO
 ```
 
-### 2️⃣ Instalar Backend
+### 2. Instalar dependencias del backend
+
 ```bash
 cd backend
 npm install
 ```
 
-### 3️⃣ Instalar Frontend
+### 3. Instalar dependencias del frontend
+
 ```bash
 cd ../frontend
 npm install
@@ -101,68 +83,62 @@ npm install
 
 ---
 
-## 🚀 Uso
+## ▶️ Ejecución
 
-### Iniciar Backend
+### Backend
 
 ```bash
 cd backend
 npm start
 ```
 
-El servidor estará disponible en **http://localhost:5001**
+- URL de la API: `http://localhost:5001`
 
-```
-🌱 Mock data inicializado en memoria
-🚀 SGDI Backend corriendo en http://localhost:5001
-📊 Environment: development
-🗄️  Database: Mock Data (sin base de datos)
-```
-
-### Iniciar Frontend
+### Frontend
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-El cliente estará disponible en **http://localhost:5173** o **http://localhost:5174**
+- URL del cliente: normalmente `http://localhost:5173`
 
 ---
 
-## 📁 Estructura del Proyecto
+## 📁 Estructura del proyecto
 
-```
-sgdi-beta1/
+```text
+PARCIALULTIMO/
 ├── backend/
 │   ├── src/
-│   │   ├── controllers/      # Lógica de negocio (10 controladores)
-│   │   ├── models/           # Definiciones de entidades
-│   │   ├── routes/           # Rutas API
-│   │   ├── middleware/       # Auth, validación, error handling
-│   │   ├── config/           # Configuración
-│   │   ├── mockData.js       # Datos simulados
-│   │   ├── app.js            # Configuración Express
-│   │   └── server.js         # Entry point
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── app.js
+│   │   ├── mockData.js
+│   │   └── server.js
 │   ├── package.json
 │   └── API_DOCUMENTATION.md
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── components/       # Componentes UI reutilizables
-│   │   ├── features/         # Módulos por feature (hooks, types)
-│   │   ├── layouts/          # Layouts (AppLayout, AuthLayout)
-│   │   ├── pages/            # Páginas principales
-│   │   ├── router/           # Configuración de rutas
-│   │   ├── store/            # Estado global (Zustand)
-│   │   ├── lib/              # Utilidades (API client, query client)
-│   │   ├── types/            # TypeScript types
-│   │   ├── styles/           # Estilos globales
-│   │   ├── App.tsx           # Root component
-│   │   └── main.tsx          # Entry point
+│   │   ├── components/
+│   │   ├── features/
+│   │   ├── layouts/
+│   │   ├── lib/
+│   │   ├── pages/
+│   │   ├── router/
+│   │   ├── services/
+│   │   ├── store/
+│   │   ├── styles/
+│   │   ├── types/
+│   │   ├── App.tsx
+│   │   └── main.tsx
 │   ├── package.json
-│   ├── vite.config.ts
 │   ├── tsconfig.json
+│   ├── vite.config.ts
 │   ├── tailwind.config.ts
 │   └── postcss.config.js
 │
@@ -171,33 +147,100 @@ sgdi-beta1/
 
 ---
 
-## 🔌 API Endpoints
+## 🔌 API disponible
 
 ### Autenticación
-```
-POST   /api/v1/auth/login        - Login de usuario
-GET    /api/v1/auth/profile      - Perfil del usuario autenticado
+
+```http
+POST /api/v1/auth/login
+GET  /api/v1/auth/profile
 ```
 
 ### Clientes
-```
-GET    /api/v1/clientes          - Listar todos los clientes
-POST   /api/v1/clientes          - Crear nuevo cliente
-GET    /api/v1/clientes/:id      - Obtener cliente por ID
-PUT    /api/v1/clientes/:id      - Actualizar cliente
-DELETE /api/v1/clientes/:id      - Eliminar cliente
+
+```http
+GET    /api/v1/clientes
+POST   /api/v1/clientes
+GET    /api/v1/clientes/:id
+PUT    /api/v1/clientes/:id
+DELETE /api/v1/clientes/:id
 ```
 
 ### Servicios
-```
-GET    /api/v1/servicios         - Listar servicios
-POST   /api/v1/servicios         - Crear servicio
-GET    /api/v1/servicios/:id     - Obtener servicio
-PUT    /api/v1/servicios/:id     - Actualizar servicio
-DELETE /api/v1/servicios/:id     - Eliminar servicio
+
+```http
+GET    /api/v1/servicios
+POST   /api/v1/servicios
+GET    /api/v1/servicios/:id
+PUT    /api/v1/servicios/:id
+DELETE /api/v1/servicios/:id
 ```
 
 ### Suscripciones
+
+```http
+GET    /api/v1/suscripciones
+POST   /api/v1/suscripciones
+GET    /api/v1/suscripciones/:id
+PUT    /api/v1/suscripciones/:id
+DELETE /api/v1/suscripciones/:id
+```
+
+### Eventos / Calendario
+
+```http
+GET    /api/v1/calendario
+POST   /api/v1/calendario
+DELETE /api/v1/calendario/:id
+```
+
+### Oportunidades / Pipeline
+
+```http
+GET    /api/v1/pipeline
+POST   /api/v1/pipeline
+PUT    /api/v1/pipeline/:id
+DELETE /api/v1/pipeline/:id
+```
+
+---
+
+## 🧪 Credenciales de prueba
+
+- Usuario: `admin@sgdi.local`
+- Contraseña: `Admin123!`
+
+---
+
+## 📝 Notas importantes
+
+- El backend usa datos mock. Si quieres conectar una base real, debes agregar la configuración de base de datos en `backend/src/config/env.js`.
+- El login usa JWT con expiración.
+- Si el frontend no carga CSS, verifica que existe `frontend/src/vite-env.d.ts` y que el proyecto está bien configurado.
+
+---
+
+## 🧹 Git y organización
+
+- Asegúrate de tener el remote correcto:
+  ```bash
+git remote set-url origin git@github.com:juanacuna6343/PARCIALULTIMO.git
+```
+- Haz commits claros y pequeños.
+- Usa `git status` para revisar cambios antes de pushear.
+- Si hay conflicto de permisos, revisa tu cuenta GitHub y credenciales.
+
+---
+
+## 📎 Recursos
+
+- Frontend: `frontend/`
+- Backend: `backend/`
+- Documentación API: `backend/API_DOCUMENTATION.md`
+
+---
+
+Gracias por usar `PARCIALULTIMO`. Si quieres, también puedo ayudarte a generar un `.gitignore` limpio y organizar los commits antes de subir todo.  
 ```
 GET    /api/v1/suscripciones     - Listar suscripciones
 POST   /api/v1/suscripciones     - Crear suscripción
