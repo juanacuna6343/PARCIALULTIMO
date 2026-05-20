@@ -1,9 +1,30 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { mockData } = require('../mockData');
+const { supabase } = require('../lib/supabase');
 const env = require('../config/env');
 
-exports.login = (req, res) => {
+const getUserByEmail = async (email) => {
+  if (env.supabase.url && env.supabase.key) {
+    const { data, error } = await supabase.from('usuarios').select('*').eq('email', email).maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+
+  return mockData.usuarios.find((u) => u.email === email);
+};
+
+const getUserById = async (id) => {
+  if (env.supabase.url && env.supabase.key) {
+    const { data, error } = await supabase.from('usuarios').select('*').eq('id', id).maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+
+  return mockData.usuarios.find((u) => u.id === id);
+};
+
+exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -11,7 +32,7 @@ exports.login = (req, res) => {
       return res.status(400).json({ code: 'VALIDATION_ERROR', message: 'Email y contraseña requeridos' });
     }
 
-    const usuario = mockData.usuarios.find((u) => u.email === email);
+    const usuario = await getUserByEmail(email);
 
     if (!usuario || !usuario.activo) {
       return res.status(401).json({ code: 'AUTH_FAILED', message: 'Credenciales inválidas' });
@@ -44,9 +65,9 @@ exports.login = (req, res) => {
   }
 };
 
-exports.profile = (req, res) => {
+exports.profile = async (req, res) => {
   try {
-    const usuario = mockData.usuarios.find((u) => u.id === req.user.userId);
+    const usuario = await getUserById(req.user.userId);
 
     if (!usuario) {
       return res.status(404).json({ code: 'NOT_FOUND', message: 'Usuario no encontrado' });

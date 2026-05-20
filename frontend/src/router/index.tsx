@@ -13,6 +13,7 @@ const SuscripcionesPage = lazy(() => import('../pages/SuscripcionesPage'))
 const EventosPage     = lazy(() => import('../pages/EventosPage'))
 const PipelinePage    = lazy(() => import('../pages/PipelinePage'))
 const CalendarioPage  = lazy(() => import('../pages/CalendarioPage'))
+const ArchivosPage    = lazy(() => import('../pages/ArchivosPage'))
 const UsuariosPage    = lazy(() => import('../pages/UsuariosPage'))
 const NotFoundPage    = lazy(() => import('../pages/NotFoundPage'))
 
@@ -44,6 +45,7 @@ export const AppRouter = () => (
           <Route path="/eventos"       element={<EventosPage />}       />
           <Route path="/pipeline"      element={<PipelinePage />}      />
           <Route path="/calendario"    element={<CalendarioPage />}    />
+          <Route path="/archivos"      element={<ArchivosPage />}      />
           <Route path="/usuarios"      element={<UsuariosPage />}      />
         </Route>
       </Route>

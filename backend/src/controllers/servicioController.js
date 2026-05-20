@@ -1,32 +1,41 @@
 const { mockData, addItem, findById, updateItem, deleteItem, findAllByField } = require('../mockData');
+const { supabase } = require('../lib/supabase');
 
-exports.listServicios = (req, res) => {
+exports.listServicios = async (req, res) => {
   try {
-    const servicios = mockData.servicios.map((s) => {
-      const cliente = mockData.clientes.find((c) => c.id === s.clienteId);
-      return {
-        id: s.id,
-        nombre: s.tipo,
-        descripcion: s.descripcion,
-        clienteId: s.clienteId,
-        clienteNombre: cliente?.nombre,
-        estado: s.estado,
-        precio: s.valor,
-        fechaInicio: s.fechaInicio?.toISOString() || new Date().toISOString(),
-        fechaFin: s.fechaFin?.toISOString(),
-        notas: s.descripcion,
-        createdAt: s.createdAt?.toISOString(),
-        updatedAt: s.updatedAt?.toISOString(),
-      };
-    });
-    res.json({ success: true, data: servicios });
+    const { data: servicios, error } = await supabase
+      .from('servicios')
+      .select(`
+        *,
+        clientes (id, nombre)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const response = servicios.map((s) => ({
+      id: s.id,
+      nombre: s.tipo,
+      descripcion: s.descripcion,
+      clienteId: s.cliente_id,
+      clienteNombre: s.clientes?.nombre || 'N/A',
+      estado: s.estado,
+      precio: s.valor,
+      fechaInicio: s.fecha_inicio,
+      fechaFin: s.fecha_fin,
+      notas: s.descripcion,
+      createdAt: s.created_at,
+      updatedAt: s.updated_at,
+    }));
+
+    res.json({ success: true, data: response || [] });
   } catch (error) {
     console.error('❌ Error listando servicios:', error);
     res.status(500).json({ code: 'SERVER_ERROR', message: error.message });
   }
 };
 
-exports.createServicio = (req, res) => {
+exports.createServicio = async (req, res) => {
   try {
     const { nombre, clienteId, fechaInicio, fechaFin, precio, estado, descripcion } = req.body;
 
@@ -34,34 +43,47 @@ exports.createServicio = (req, res) => {
       return res.status(400).json({ code: 'VALIDATION_ERROR', message: 'Nombre y clienteId son requeridos' });
     }
 
-    const cliente = findById('clientes', clienteId);
-    if (!cliente) {
+    const { data: cliente, error: clienteError } = await supabase
+      .from('clientes')
+      .select('*')
+      .eq('id', clienteId)
+      .single();
+
+    if (!cliente || clienteError) {
       return res.status(400).json({ code: 'FOREIGN_KEY_ERROR', message: 'Cliente no existe' });
     }
 
-    const servicio = addItem('servicios', {
-      tipo: nombre,
-      clienteId,
-      fechaInicio: fechaInicio ? new Date(fechaInicio) : new Date(),
-      fechaFin: fechaFin ? new Date(fechaFin) : null,
-      valor: precio || 0,
-      estado: estado || 'pendiente',
-      descripcion: descripcion || '',
-    });
+    const { data: servicio, error } = await supabase
+      .from('servicios')
+      .insert([
+        {
+          tipo: nombre,
+          cliente_id: clienteId,
+          fecha_inicio: fechaInicio || new Date(),
+          fecha_fin: fechaFin || null,
+          valor: precio || 0,
+          estado: estado || 'pendiente',
+          descripcion: descripcion || '',
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
 
     const response = {
       id: servicio.id,
       nombre: servicio.tipo,
       descripcion: servicio.descripcion,
-      clienteId: servicio.clienteId,
-      clienteNombre: cliente?.nombre,
+      clienteId: servicio.cliente_id,
+      clienteNombre: cliente.nombre,
       estado: servicio.estado,
       precio: servicio.valor,
-      fechaInicio: servicio.fechaInicio?.toISOString(),
-      fechaFin: servicio.fechaFin?.toISOString(),
+      fechaInicio: servicio.fecha_inicio,
+      fechaFin: servicio.fecha_fin,
       notas: servicio.descripcion,
-      createdAt: servicio.createdAt?.toISOString(),
-      updatedAt: servicio.updatedAt?.toISOString(),
+      createdAt: servicio.created_at,
+      updatedAt: servicio.updated_at,
     };
 
     res.status(201).json({ success: true, data: response, message: 'Servicio creado exitosamente' });
@@ -71,10 +93,15 @@ exports.createServicio = (req, res) => {
   }
 };
 
-exports.updateServicio = (req, res) => {
+exports.updateServicio = async (req, res) => {
   try {
-    const servicio = findById('servicios', parseInt(req.params.id));
-    if (!servicio) {
+    const { data: servicio, error: getError } = await supabase
+      .from('servicios')
+      .select('*')
+      .eq('id', parseInt(req.params.id))
+      .single();
+
+    if (!servicio || getError) {
       return res.status(404).json({ code: 'NOT_FOUND', message: 'Servicio no encontrado' });
     }
 
@@ -84,22 +111,34 @@ exports.updateServicio = (req, res) => {
     delete updateData.nombre;
     delete updateData.precio;
 
-    const actualizado = updateItem('servicios', parseInt(req.params.id), updateData);
-    const cliente = findById('clientes', actualizado.clienteId);
+    const { data: actualizado, error } = await supabase
+      .from('servicios')
+      .update(updateData)
+      .eq('id', parseInt(req.params.id))
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    const { data: cliente } = await supabase
+      .from('clientes')
+      .select('nombre')
+      .eq('id', actualizado.cliente_id)
+      .single();
 
     const response = {
       id: actualizado.id,
       nombre: actualizado.tipo,
       descripcion: actualizado.descripcion,
-      clienteId: actualizado.clienteId,
-      clienteNombre: cliente?.nombre,
+      clienteId: actualizado.cliente_id,
+      clienteNombre: cliente?.nombre || 'N/A',
       estado: actualizado.estado,
       precio: actualizado.valor,
-      fechaInicio: actualizado.fechaInicio?.toISOString(),
-      fechaFin: actualizado.fechaFin?.toISOString(),
+      fechaInicio: actualizado.fecha_inicio,
+      fechaFin: actualizado.fecha_fin,
       notas: actualizado.descripcion,
-      createdAt: actualizado.createdAt?.toISOString(),
-      updatedAt: actualizado.updatedAt?.toISOString(),
+      createdAt: actualizado.created_at,
+      updatedAt: actualizado.updated_at,
     };
 
     res.json({ success: true, data: response, message: 'Servicio actualizado exitosamente' });
@@ -109,20 +148,57 @@ exports.updateServicio = (req, res) => {
   }
 };
 
-exports.listHitos = (req, res) => {
+exports.deleteServicio = async (req, res) => {
   try {
-    const tareas = findAllByField('tareas', 'servicioId', parseInt(req.params.id));
-    res.json({ success: true, data: tareas });
+    const { data: servicio, error: getError } = await supabase
+      .from('servicios')
+      .select('*')
+      .eq('id', parseInt(req.params.id))
+      .single();
+
+    if (!servicio || getError) {
+      return res.status(404).json({ code: 'NOT_FOUND', message: 'Servicio no encontrado' });
+    }
+
+    const { error } = await supabase
+      .from('servicios')
+      .delete()
+      .eq('id', parseInt(req.params.id));
+
+    if (error) throw error;
+
+    res.json({ success: true, message: 'Servicio eliminado exitosamente' });
+  } catch (error) {
+    console.error('❌ Error eliminando servicio:', error);
+    res.status(500).json({ code: 'SERVER_ERROR', message: error.message });
+  }
+};
+
+exports.listHitos = async (req, res) => {
+  try {
+    const { data: tareas, error } = await supabase
+      .from('tareas')
+      .select('*')
+      .eq('servicio_id', parseInt(req.params.id));
+
+    if (error) throw error;
+
+    res.json({ success: true, data: tareas || [] });
   } catch (error) {
     console.error('❌ Error listando hitos:', error);
     res.status(500).json({ code: 'SERVER_ERROR', message: error.message });
   }
 };
 
-exports.addHito = (req, res) => {
+exports.addHito = async (req, res) => {
   try {
-    const servicio = findById('servicios', parseInt(req.params.id));
-    if (!servicio) {
+    const { data: servicio, error: getError } = await supabase
+      .from('servicios')
+      .select('*')
+      .eq('id', parseInt(req.params.id))
+      .single();
+
+    if (!servicio || getError) {
       return res.status(404).json({ code: 'NOT_FOUND', message: 'Servicio no encontrado' });
     }
 
@@ -132,15 +208,23 @@ exports.addHito = (req, res) => {
       return res.status(400).json({ code: 'VALIDATION_ERROR', message: 'Título es requerido' });
     }
 
-    const tarea = addItem('tareas', {
-      titulo,
-      descripcion: descripcion || '',
-      fechaVencimiento: fechaVencimiento ? new Date(fechaVencimiento) : null,
-      prioridad: prioridad || 'media',
-      completada: false,
-      servicioId: parseInt(req.params.id),
-      responsableId: responsableId || null,
-    });
+    const { data: tarea, error } = await supabase
+      .from('tareas')
+      .insert([
+        {
+          titulo,
+          descripcion: descripcion || '',
+          fecha_vencimiento: fechaVencimiento || null,
+          prioridad: prioridad || 'media',
+          completada: false,
+          servicio_id: parseInt(req.params.id),
+          usuario_id: responsableId || null,
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
 
     res.status(201).json({ success: true, data: tarea, message: 'Hito agregado exitosamente' });
   } catch (error) {

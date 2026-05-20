@@ -2,7 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Users, Briefcase, CalendarDays, UserCog,
-  Settings, LogOut, Menu, X, ChevronRight, Bell, Sun, Moon, CreditCard, Megaphone, TrendingUp,
+  Settings, LogOut, Menu, X, ChevronRight, Bell, Sun, Moon, CreditCard, Megaphone, TrendingUp, CloudUpload,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuthStore } from '../store/useAuthStore'
@@ -16,7 +16,8 @@ const navItems = [
   { label: 'Suscripciones',  icon: CreditCard,       path: '/suscripciones' },
   { label: 'Eventos',        icon: Megaphone,        path: '/eventos' },
   { label: 'Pipeline',       icon: TrendingUp,       path: '/pipeline' },
-  { label: 'Calendario',     icon: CalendarDays,     path: '/calendario'},
+  { label: 'Calendario',     icon: CalendarDays,     path: '/calendario' },
+  { label: 'Archivos',       icon: CloudUpload,      path: '/archivos' },
   { label: 'Usuarios',       icon: UserCog,          path: '/usuarios'  },
 ]
 

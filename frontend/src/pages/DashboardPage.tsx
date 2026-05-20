@@ -89,7 +89,7 @@ export default function DashboardPage() {
         <div>
           <p className="text-xs text-surface-500 font-medium">{greeting}</p>
           <h1 className="font-display font-bold text-2xl text-surface-100 mt-0.5">
-            {user?.nombre?.split(' ')[0]} 👋
+            {user?.nombre?.split(' ')[0]} 
           </h1>
           <p className="text-sm text-surface-400 mt-1">
             Aquí tienes el resumen de hoy — {new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -138,7 +138,12 @@ export default function DashboardPage() {
                 <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
                 <YAxis tickFormatter={(v) => `${(v/1000000).toFixed(1)}M`} tick={{ fontSize: 11 }} width={40} />
                 <Tooltip
-                  formatter={(v: number) => [formatCOP(v), 'Ingresos']}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  formatter={(value: any) => {
+                    if (value == null || Array.isArray(value)) return ['', 'Ingresos']
+                    const numericValue = typeof value === 'number' ? value : Number(value)
+                    return [formatCOP(numericValue), 'Ingresos']
+                  }}
                   contentStyle={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 12 }}
                   labelStyle={{ color: '#94A3B8' }}
                 />

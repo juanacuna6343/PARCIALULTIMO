@@ -2,7 +2,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env';
-const envPath = path.resolve(__dirname, '..', '..', envFile);
+const envPath = path.resolve(__dirname, '..', '..', '..', envFile);
 
 dotenv.config({ path: envPath });
 
@@ -20,5 +20,9 @@ module.exports = {
     database: process.env.DB_NAME || 'sgdi_db',
     username: process.env.DB_USER || 'sgdi_user',
     password: process.env.DB_PASSWORD || 'SecurePassword123!'
+  },
+  supabase: {
+    url: process.env.SUPABASE_URL || '',
+    key: process.env.SUPABASE_KEY || ''
   }
 };

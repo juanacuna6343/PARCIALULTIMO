@@ -8,6 +8,7 @@ const dashboardRoutes = require('./dashboard');
 const suscripcionRoutes = require('./suscripciones');
 const eventoRoutes = require('./eventos');
 const pipelineRoutes = require('./pipeline');
+const archivosRoutes = require('./archivos');
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.use('/dashboard', dashboardRoutes);
 router.use('/suscripciones', suscripcionRoutes);
 router.use('/eventos', eventoRoutes);
 router.use('/pipeline', pipelineRoutes);
+router.use('/archivos', archivosRoutes);
 
 module.exports = router;
