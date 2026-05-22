@@ -26,13 +26,19 @@ export const useSuscripciones = () =>
 export const useCreateSuscripcion = () => {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (data: SuscripcionFormData) => 
-      api.post<ApiResponse<Suscripcion>>('/suscripciones', data).then(r => r.data),
+    mutationFn: (data: SuscripcionFormData) => {
+      console.log('createSuscripcion payload', data)
+      return api.post<ApiResponse<Suscripcion>>('/suscripciones', data).then(r => r.data)
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['suscripciones'] })
       toast.success('Suscripción creada correctamente')
     },
-    onError: () => toast.error('Error al crear la suscripción'),
+    onError: (error: any) => {
+      console.error('Error creando suscripción:', error?.response?.data || error)
+      const message = error?.response?.data?.message || error?.response?.data?.error?.message || 'Error al crear la suscripción'
+      toast.error(message)
+    },
   })
 }
 

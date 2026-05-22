@@ -1,5 +1,6 @@
 const app = require('./app');
 const env = require('./config/env');
+const { supabaseConfigured } = require('./lib/supabase');
 
 async function start() {
   try {
@@ -8,7 +9,7 @@ async function start() {
     app.listen(env.port, () => {
       console.log(`🚀 SGDI Backend corriendo en http://localhost:${env.port}`);
       console.log(`📊 Environment: ${env.nodeEnv}`);
-      console.log(`🗄️  Database: Mock Data (sin base de datos)\n`);
+      console.log(`🗄️  Database: ${supabaseConfigured ? '✅ Supabase Connected' : 'Mock Data (sin base de datos)'}\n`);
       console.log('📋 Credenciales de prueba:');
       console.log('   Email: admin@sgdi.local');
       console.log('   Contraseña: Admin123!\n');
