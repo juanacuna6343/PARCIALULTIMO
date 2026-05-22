@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { CloudUpload, FileText, X, Upload, CheckCircle, AlertCircle } from 'lucide-react'
+import api from '../lib/api'
 
 // ─── Tipos ──────────────────────────────────────────────────────────
 interface UploadFile {
@@ -61,17 +62,38 @@ export default function ArchivosPage() {
 
   const handleUpload = async () => {
     setFiles((prev) => prev.map((f) => ({ ...f, status: 'uploading' })))
+
     for (const file of files) {
       const formData = new FormData()
       formData.append('file', file.raw)
       formData.append('nombre', file.name)
-      // TODO: reemplaza esta simulación con tu llamada real a la API o Supabase
-      // await fetch('/api/archivos/upload', { method: 'POST', body: formData })
-      setFiles((prev) =>
-        prev.map((f) =>
-          f.id === file.id ? { ...f, status: 'done', progress: 100 } : f
+
+      try {
+        const response = await api.post('/archivos/upload', formData)
+        if (response.data?.success) {
+          setFiles((prev) =>
+            prev.map((f) =>
+              f.id === file.id ? { ...f, status: 'done', progress: 100 } : f
+            )
+          )
+        } else {
+          const message = response.data?.message || 'Error al subir archivo'
+          setFiles((prev) =>
+            prev.map((f) =>
+              f.id === file.id ? { ...f, status: 'error', progress: 0 } : f
+            )
+          )
+          setNote(message)
+        }
+      } catch (error: any) {
+        const message = error?.response?.data?.message || 'Error de conexión al subir archivo'
+        setFiles((prev) =>
+          prev.map((f) =>
+            f.id === file.id ? { ...f, status: 'error', progress: 0 } : f
+          )
         )
-      )
+        setNote(message)
+      }
     }
   }
 

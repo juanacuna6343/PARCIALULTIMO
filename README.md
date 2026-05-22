@@ -389,20 +389,6 @@ El sistema incluye datos simulados para desarrollo y pruebas:
 
 ---
 
-## 🔐 Credenciales de Prueba
-
-### Usuario Admin
-```
-Email: admin@sgdi.local
-Contraseña: Admin123!
-Rol: Admin
-```
-
-### Otros usuarios de prueba disponibles
-- **supervisor@sgdi.local** - Rol Supervisor
-- **user@sgdi.local** - Rol Usuario
-
----
 
 ## � Notas Importantes
 
@@ -499,8 +485,6 @@ Sistema de Gestión Digital Integrado (SGDI) - BETA 1
 ---
 
 **¡Gracias por usar PARCIALULTIMO! 🙌**
-
-### Componentes Reutilizables
 - Button, Input, Select
 - Card, Badge, Avatar
 - Modal, ConfirmModal

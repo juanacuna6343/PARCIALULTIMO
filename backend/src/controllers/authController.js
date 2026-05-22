@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { mockData } = require('../mockData');
-const { supabase } = require('../lib/supabase');
+const { supabase, supabaseConfigured } = require('../lib/supabase');
 const env = require('../config/env');
 
 const getUserByEmail = async (email) => {
-  if (env.supabase.url && env.supabase.key) {
+  if (supabaseConfigured && supabase) {
     const { data, error } = await supabase.from('usuarios').select('*').eq('email', email).maybeSingle();
     if (error) throw error;
     return data;
@@ -15,7 +15,7 @@ const getUserByEmail = async (email) => {
 };
 
 const getUserById = async (id) => {
-  if (env.supabase.url && env.supabase.key) {
+  if (supabaseConfigured && supabase) {
     const { data, error } = await supabase.from('usuarios').select('*').eq('id', id).maybeSingle();
     if (error) throw error;
     return data;
