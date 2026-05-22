@@ -1,4 +1,4 @@
-# 🚀 PARCIALULTIMO - SGDI Beta 1
+ # 🚀 PARCIALULTIMO - SGDI Beta 1
 
 **Sistema de Gestión Digital Integrado** - Aplicación fullstack para administración de clientes, servicios, suscripciones, eventos y pipeline comercial.
 
